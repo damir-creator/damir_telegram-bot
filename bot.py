@@ -1,6 +1,7 @@
 import logging
 import os
-from telegram import Update
+import asyncio
+from telegram import Update, Bot
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 from openai import OpenAI
 
@@ -35,8 +36,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await context.bot.send_message(chat_id=chat_id, text=reply)
 
+# Удаляем старый webhook перед запуском
+async def remove_webhook():
+    bot = Bot(token=TELEGRAM_TOKEN)
+    await bot.delete_webhook(drop_pending_updates=True)
+
 # Запуск
 if __name__ == '__main__':
+    asyncio.run(remove_webhook())  # Удаляем старый webhook
+
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
