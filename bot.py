@@ -1,27 +1,27 @@
 import logging
-import openai
+import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
+from openai import OpenAI
 
-# ВСТАВЬ СЮДА СВОИ КЛЮЧИ (но Railway сам их подставит)
-import os
+# Получение токенов из переменных окружения
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-openai.api_key = OPENAI_API_KEY
+client = OpenAI(api_key=OPENAI_API_KEY)
 logging.basicConfig(level=logging.INFO)
 
-# Стартовое сообщение
+# /start команда
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Привет! Я бот Дамира. Пиши что угодно — поболтаем 🙂")
 
-# Ответ на любое сообщение
+# Ответ на текст
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
     chat_id = update.message.chat_id
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "Ты — дружелюбный, простой, немного шутливый собеседник. Отвечай как будто ты Дамир, всегда вежливо и с теплотой."},
